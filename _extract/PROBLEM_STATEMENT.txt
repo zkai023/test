@@ -1,0 +1,57 @@
+[Normal] END-OF-COURSE PROJECT · MILESTONE 1
+[Normal] Project Problem Statement
+[Normal] Submit by the end of Week 3 [23 August 23:59 hrs]· ~1 page · individual · formative (not graded) — you’ll get written feedback. This seeds your End-of-Course Project (it maps to Project Rubric criteria 1 & 2).
+[Normal] This submission is NOT graded. However, on time non-submission counts towards incomplete End of course project.
+[Normal] Name: ______Zhu Kai___________________     Section (A / B / C): __A____     Date: __19/08/2026________
+[Normal] 1 · Working title
+[Normal] A short, specific name for your project.
+[Normal] 2 · The problem, and why it matters
+[Normal] Who has this problem, and why is it worth solving? 2–3 sentences. (Rubric 1)
+[Normal] 3 · Who it’s for, and the domain
+[Normal] Your user / audience and the industry (e.g. banking, healthcare, retail, your employer).
+[Normal] 4 · Why AI — and which kind? Remember, from class 1 workshops, no one size fits all 
+[Normal] Is AI the right tool here (vs a rule or lookup)? If yes, which type — narrow ML, a foundation model, RAG, an agent? (ILO 1)
+[Normal] 5 · Proposed approach — build vs buy or both!
+[Normal] What will you build (low-code and/or code)? Which layers will you own vs rent, and why? (Rubric 2, ILO 3)
+[Normal] 6 · Data – this packs the intelligence ! 
+[Normal] What data do you need, where from, and any access / privacy / residency constraints?
+[Normal] 7 · Success metric & how you’ll evaluate it
+[Normal] One metric that ties to real value, and one check (an eval) you could actually run. (evals thread)
+[Normal] 8 · Risks, limitations & responsible use
+[Normal] What could go wrong (incl. silent failure), and who might it affect?
+[Normal] 9 · Smallest first version (optional)
+[Normal] The tiniest end-to-end slice you could build first.
+[Normal] How this is used
+[Normal] This milestone is not graded — it’s to give you fast, written feedback while there’s still time to change direction. A strong problem statement makes criteria 1 (problem & significance) and 2 (business & technical trade-offs) and helps you start on a strong footing. Bring questions during class breakouts or email the course account or WA text me
+[Normal] INSTRUCTOR FEEDBACK
+[Normal] For marker use — formative comments on the problem & significance (criterion 1) and the business/technical trade-offs (criterion 2), plus one thing to strengthen before the final project.
+
+--- TABLE 1 ---
+A Hybrid AI and RAG System for Football Transfer Rumor Filtering, Fact-Checking, and PR Alerting
+
+--- TABLE 2 ---
+Public relations (PR) teams at professional football clubs struggle to monitor thousands of social media transfer rumors daily, which can trigger fan anxiety and locker room instability. Manually tracking every post is impossible, while running expensive Large Language Models (LLMs) on all incoming data is cost-prohibitive. Solving this with a hybrid AI system will drastically reduce operational costs and workload, while instantly alerting clubs to high-risk brand crises.
+
+--- TABLE 3 ---
+The target users are the Public Relations (PR), media monitoring, and communication teams of professional football clubs (e.g., English Premier League clubs). The domain is sports public relations, brand protection, and crisis management.
+
+--- TABLE 4 ---
+We will implement a Hybrid AI & RAG System (Narrow ML + RAG + Foundation Model). A lightweight Narrow ML classifier will filter out 80% of low-grade rumor noise. For the remaining 20% high-risk rumors, we will use a RAG (Retrieval-Augmented Generation) system to query a local Vector DB. This ensures the Foundation Model generates PR alerts and draft responses strictly grounded in the club's official player contracts and brand guidelines, completely preventing Silent Failure and Confident Hallucination.
+
+--- TABLE 5 ---
+We will Build and Own the data pipeline, the local Vector Database (Chroma/FAISS) containing proprietary club contract facts, and the L1 deterministic code assertions to verify retrieved content. We will Rent the LLM’s general reasoning capacity through OpenRouter API. This strategy keeps our core business data and factual rules fully under our control (Own), while outsourcing the heavy language processing (Rent).
+
+--- TABLE 6 ---
+The system will use two simple datasets: (1) A test list of 15–20 public transfer rumors copied from social media. (2) A synthetic, AI-generated Markdown document containing 10 fictional player contract profiles and 3 PR response templates to act as our local Vector DB source. This synthetic data is 100% private, safe, and has zero-barrier for acquisition.
+
+--- TABLE 7 ---
+Business Metric: Escape Rate (missed high-risk rumors = 0%) and Groundedness Score (percentage of PR outputs that accurately match RAG facts, target = 100%).
+Technical Eval Check: L1 Assertions will check that outputs are in valid JSON and contain retrieved player-specific identifiers. An L2 LLM-as-judge will rate the Faithfulness of the generated PR response against the retrieved source documents using a 3-point rubric.
+
+--- TABLE 8 ---
+The primary risk is a Silent Failure (specifically a False Negative), where the first-layer lightweight filter incorrectly classifies a genuine, high-risk hostile leak as "low-risk noise," causing the PR team to miss the golden response window. To mitigate this risk for responsible use, we will set a highly conservative classification threshold (biasing toward safety) and implement a simple periodic human-in-the-loop audit for filtered-out posts.
+
+--- TABLE 9 ---
+A local Python script that reads 2 synthetic player profiles, chunks and embeds them into a lightweight local Vector DB (e.g., Chroma), and runs a simple query. When a mock transfer rumor is inputted, the script retrieves the relevant player facts, sends them to the OpenRouter API, and prints a grounded, structured JSON response.
+
+--- TABLE 10 ---

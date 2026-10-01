@@ -1,0 +1,464 @@
+
+===== PAGE 1 =====
+PE6201  ·  EMERGING AI TECHNOLOGIES
+A1 · Foundations Build · FAQ
+Nanyang Technological University  ·  MSc Enterprise AI  ·  T1 AY2026–27
+Page 1
+ASSIGNMENT 1 OF 2 · COMPANION TO THE A1 BRIEF
+A1 — Questions people actually ask
+Read the brief first. This answers the words in it that do real work — and gives you the formulas, so nothing here
+depends on you guessing what I meant.
+One thing before you start. Every definition below is deliberately concrete, because vague definitions produce vague
+submissions. Where there is a formula, code it — do not estimate. Where there is a judgement call, make it and say why. Marks
+come from the saying-why far more than from the number.
+PART 1 — THE FOUR MEASUREMENTS
+What exactly is “accuracy”, and how do I compute it?
+Of the items you tested, the fraction the system got right. Nothing more sophisticated is required. Both approaches must be
+scored on the same test items, or the two numbers cannot be compared.
+accuracy = sum(1 for p, t in zip(predictions, truth) if p == t) / len(truth)
+ 
+# always print this next to it:
+from collections import Counter
+baseline = Counter(truth).most_common(1)[0][1] / len(truth)
+# baseline = the score you get by ALWAYS guessing the most common category,
+# while knowing nothing. An accuracy that cannot beat it is not a result.
+If your categories are lopsided — 80% of your examples in one bucket — an 80% accuracy means your system has learned
+nothing. This is the single most common way a submission looks good and says nothing. Report the baseline every time.
+What counts as “cost”? The API charges a fraction of a cent — is that the whole answer?
+No, and noticing that is half of Part 1. There are two costs, and they behave completely differently.
+ Runs per prediction
+Paid once
+Who pays
+Foundation-model API
+yes — every single call, forever
+almost nothing to set up
+your budget, per item,
+indefinitely
+Trained classifier
+effectively zero
+labelling the training data
+your time, once (and again
+whenever the categories
+change)
+The API cost per item comes straight from the token counts your notebook already tallies. Look up today's price for your
+model on openrouter.ai/models — prices change, so quote the date you checked.
+PRICE_IN  = 0.15   # US$ per 1,000,000 input tokens  — CHECK TODAY'S PRICE
+PRICE_OUT = 0.60   # US$ per 1,000,000 output tokens
+ 
+run_cost      = tokens_in/1e6*PRICE_IN + tokens_out/1e6*PRICE_OUT
+cost_per_item = run_cost / n_items
+How do I measure latency properly?
+Wall-clock time for one prediction. Measure it per item and report both the median and the slowest few — the mean alone
+hides the one call that took four seconds, and in a real system it is the slow tail that users complain about.
+
+
+===== PAGE 2 =====
+PE6201  ·  EMERGING AI TECHNOLOGIES
+A1 · Foundations Build · FAQ
+Nanyang Technological University  ·  MSc Enterprise AI  ·  T1 AY2026–27
+Page 2
+import time
+times_ms = []
+for item in test_items:
+    t0 = time.perf_counter()
+    prediction = classify(item)
+    times_ms.append((time.perf_counter() - t0) * 1000)
+ 
+times_ms.sort()
+p50 = times_ms[len(times_ms)//2]              # typical
+p95 = times_ms[int(len(times_ms)*0.95) - 1]   # the slow tail — the one that hurts
+Expect the classifier to be roughly a thousand times faster. That is not a small detail: it decides whether the thing can sit inside
+a form a user is filling in, or has to run overnight as a batch.
+“Effort” is not a number. What do I actually write?
+It is not a formula, but it is not a shrug either. Keep an honest ledger while you work, and separate one-off from recurring —
+because that distinction, not the total, is what decides the answer.
+ Effort
+Trained classifier
+API call
+One-off
+labelling examples · choosing features · training
+writing and testing the prompt
+Recurring
+re-labelling and re-training whenever the categories
+change or the language drifts
+prompt maintenance when the model is deprecated or
+replaced · watching the bill
+Skill needed
+someone who can run and read a training script
+someone who can write clear instructions
+Write it in hours, and be truthful. An inflated figure will contradict the rest of your notebook, and the marker can see the
+notebook.
+You keep saying “at what scale would your answer change?” — what does scale mean here?
+Scale, for this assignment, is one number: how many items your system would have to handle over its working life. Not how
+big your company is. Not how much data exists in the world. How many times this specific task would run.
+Pick the unit that fits your domain and say what it is — support tickets per month, patients per clinic per day, match reports per
+season, products in the catalogue. Then find your crossover: the volume at which the cheaper option stops being the cheaper
+option. Put a value on your own time; any defensible rate works, as long as you state it.
+YOUR_HOURLY_RATE = 25       # US$/hour — state whatever you use, and why
+LABELLING_HOURS  = 3.5      # what it actually took you, scaled to a real dataset
+ 
+one_off_cost_of_owning = LABELLING_HOURS * YOUR_HOURLY_RATE
+crossover_items        = one_off_cost_of_owning / cost_per_item
+ 
+print(f'below {crossover_items:,.0f} items the API is cheaper overall;'
+      f' above it, the classifier is')
+Then say the sentence out loud in your writeup: “At my domain's realistic volume of about N items a year, the crossover sits at
+M, so I would deploy X — and I would revisit that if volume rose past M, or if the price of the model fell by half.” That
+sentence is the assignment.
+Three things scale changes, not one. Cost is the obvious one. It is not the only one, and a strong submission names at least
+two:
+  Unit economics — the crossover above.
+ Throughput and rate limits — 400 ms per item is invisible at a hundred items and is eleven hours at a hundred thousand.
+Providers also cap calls per minute.
+ Consequence of error — a 3% error rate is three wrong answers at a hundred items and thirty thousand at a million. The
+accuracy did not change; what it means did.
+
+
+===== PAGE 3 =====
+PE6201  ·  EMERGING AI TECHNOLOGIES
+A1 · Foundations Build · FAQ
+Nanyang Technological University  ·  MSc Enterprise AI  ·  T1 AY2026–27
+Page 3
+There is a fourth that matters in some domains and not others: at volume, sending every item to an external provider becomes a
+data-governance question rather than a technical one. If that is true in your domain, say so — it may outrank the arithmetic
+entirely.
+What if the API is worse than my classifier? Have I done it wrong?
+No — you have a finding, and an interesting one. Report it plainly. A cheap trained model beating a frontier model on a
+narrow, well-labelled task is a completely normal outcome, and explaining why (the task is narrow, your labels encode domain
+knowledge the prompt does not) will score better than a result where the expensive thing won and you did not ask why.
+PART 2 — WHAT “SYSTEM” AND “EDGE” MEAN
+The brief says build a “system”. Do I need an interface? A server? A deployment?
+No. None of those. In Part 2 a system means the five steps below, working, in a notebook. Nothing is hidden behind that word.
+ Step
+What it means
+1
+Collect
+10–30 short documents from your domain, in a list
+2
+Chunk
+cut each one into small overlapping slices
+3
+Embed
+turn every chunk into numbers arranged so that similar meanings sit near each other
+4
+Retrieve
+for a question, find the nearest chunks — pure arithmetic, no model, no understanding
+5
+Ground
+hand only those chunks to the model and require it to answer from them, or say it cannot
+If those five steps run and produce answers, you have built the system. No user interface, no web app, no cloud, no database.
+The starter notebook already does all five — your work is to make it yours, and then to find where it fails.
+What does “find the edge of your system” actually mean?
+The edge is the boundary between the questions your system answers reliably and the ones it does not. Everything works
+in the middle. Your job is to walk outward until it stops working, then stand at that spot and describe it precisely.
+Three different things can go wrong, and only one of them is what the brief is asking for.
+ What happened
+Is it the edge?
+What to do
+Your code throws an error, or a cell will not run
+No — that is a bug
+Fix it. Bugs are not findings.
+The right passage came back, and the model wrote a
+clumsy or wordy answer
+No — that is a generation
+wobble
+Note it in passing. It is not what Part 2
+marks.
+The right passage did not come back — retrieval
+returned the wrong chunk, or nothing useful
+Yes. This is the edge.
+Document it: which chunk should have won,
+which did, and the scores of each.
+Why retrieval and not the model? Because retrieval is the part you built. The model is rented and interchangeable; your
+chunk size, your overlap, your top-k and your documents are the system. When a retrieval-augmented system disappoints in
+industry, it is almost never the model — it is that the right passage never reached it.
+A weak answer says “it got the question wrong.” A strong one says “the chunk containing the answer ranked fourth at 0.31,
+while an unrelated chunk scored 0.44 because both contain the word water; my chunks are 45 words, so the distinguishing
+context was split into the neighbouring chunk.” Same failure. A band apart.
+How do I find an edge on purpose, rather than hoping one turns up?
+Attack it in four specific ways — the starter notebook has all four wired up:
+  Vocabulary mismatch — ask using a word that never appears in your documents but means the same thing.
+ Two documents needed — ask something that requires combining facts from two places. Retrieval fetches the most
+similar chunks, which is not the same as the set that answers the question.
+ Distractor — ask about a topic several documents touch, where only one is relevant.
+
+
+===== PAGE 4 =====
+PE6201  ·  EMERGING AI TECHNOLOGIES
+A1 · Foundations Build · FAQ
+Nanyang Technological University  ·  MSc Enterprise AI  ·  T1 AY2026–27
+Page 4
+ Absent but plausible — ask something your documents nearly, but not quite, cover. Does it decline, or does it invent?
+Inventing is the dangerous one, because it looks like an answer.
+PART 3 — WHAT A “HARNESS” IS
+What is a “harness”? Is it the prompt? The model?
+Neither. The harness is the code around your prompt that runs it against every test case automatically and scores each
+one — so that re-running the whole set after a change costs you one click instead of ten minutes of reading.
+It has exactly three parts:
+ (1) The cases — your ten inputs, each with what a correct answer must look like.
+(2) The runner — a loop that sends every case through the prompt and collects the outputs.
+(3) The scorer — the checks that turn each output into pass or fail, at both levels.
+def run(prompt_fn, cases):          # <- this loop IS the harness
+    rows = []
+    for c in cases:
+        output = generate(prompt_fn(c.text))
+        rows.append({
+            'case': c,
+            'l1':   all(ok for _, ok in l1_checks(output, c)),   # machine checks
+            'l2':   judge(c, output),                            # judgement check
+        })
+    pass_l1 = sum(r['l1'] for r in rows) / len(rows)
+    pass_l2 = sum(r['l2'] for r in rows) / len(rows)
+    return rows, pass_l1, pass_l2
+Why it matters more than the prompt. Without a harness you change a prompt, read three outputs, decide it looks better,
+and move on — and you will be wrong roughly half the time, because you did not re-check the seven cases that were already
+passing. The harness is what makes prompting an experiment rather than an opinion. It is the same idea as a test suite in
+software: the value is not in running it once, it is in running it after every change.
+The harness is also the deliverable. The brief asks for a runnable notebook — a marker should be able to re-run your cells and
+watch your numbers reappear.
+L1 and L2 — give me examples that are not about houseplants.
+ Domain
+L1 — a machine can check alone
+L2 — needs judgement
+Banking · loan form
+extraction
+valid JSON · income is a number · currency is one of
+three allowed codes
+is the extracted income the one a human would
+have picked from an ambiguous form?
+Healthcare · triage note
+summary
+all five required fields present · urgency is one of the
+allowed levels · under 80 words
+is the summary faithful to the note, and does it
+omit anything clinically relevant?
+Retail · product tagging
+every tag is from the approved taxonomy · at least one
+and at most five tags
+are the tags the ones a shopper would actually
+search for?
+Telecom · complaint
+routing
+the queue name exists · a confidence score between 0
+and 1 is returned
+given what the customer actually said, is that the
+right queue?
+Notice the pattern: L1 checks the shape of the answer, L2 checks whether it is true. An output can pass every L1 check and
+be completely wrong — which is exactly why the brief insists on both.
+My L1 pass rate was 100% on the first try. Is that good?
+Almost certainly not. It usually means one of two things: your assertions are too weak (you are checking that JSON parses, and
+nothing else), or your ten cases are all typical and none are edge or adversarial. Both are fixable in ten minutes, and both are
+worth more marks than a perfect score. A test that never fails is not testing anything.
+Do I have to use a model as the L2 judge?
+
+
+===== PAGE 5 =====
+PE6201  ·  EMERGING AI TECHNOLOGIES
+A1 · Foundations Build · FAQ
+Nanyang Technological University  ·  MSc Enterprise AI  ·  T1 AY2026–27
+Page 5
+No. Reading ten outputs yourself is a perfectly good L2 — arguably the better one, since it is the ground truth a model
+judge is only approximating. Use whichever you like, but if you use a model judge, spot-check at least three of its verdicts by
+hand and report whether you agreed. Discovering that your judge is soft is a finding, not a failure.
+Why change the prompt only once?
+Because if you change three things and the pass rate moves, you have learned nothing about which one did it. One change,
+re-run everything, read what moved — including anything that moved backwards. A case that was passing and now fails is
+called a regression, and reporting one earns you more credit than hiding it. Hiding it is also easy to spot, because your
+before-and-after tables are both in the notebook.
+THE SELF-APPRAISAL — “AI ASSISTANT” MEANS WHAT, EXACTLY?
+Which tools count as an “AI assistant” for the self-appraisal question?
+The test is simple: did it write or rewrite something that ended up in your submission, or did it change a decision you
+made? If yes, it counts — whatever it was called, and whether or not you thought of it as an AI tool at the time.
+Category
+Examples
+Counts?
+Chat assistants
+ChatGPT · Claude · Gemini · DeepSeek · Qwen / Tongyi · Doubao ·
+Kimi · Copilot chat
+Yes
+Coding assistants in your
+editor
+GitHub Copilot · Cursor · Windsurf · the Gemini suggestions built into
+Google Colab · any inline autocomplete that finishes your line
+Yes — including autocomplete
+you accepted without thinking
+Search that answers rather
+than links
+Perplexity · the AI summary at the top of a search results page
+Yes, if it changed what you did
+Writing and translation
+DeepL · Grammarly · Notion AI · WPS AI · any tool that rewrote your
+English
+Yes — say so; using one is
+completely fine
+Workplace assistants
+Microsoft 365 Copilot · Gemini in Google Workspace
+Yes
+The model calls inside the
+assignment itself
+the API classifier in Part 1 · the L2 judge in Part 3
+No — that is the subject of the
+assignment, not assistance with
+it
+Nothing here is a trap and nothing here costs you marks. The self-appraisal is not graded. The only thing that costs you
+marks is submitting numbers you did not measure or code you cannot account for.
+I wrote everything by hand. What do I put?
+Say that — it is a complete and perfectly good answer, and it costs you nothing. The more interesting version says what you
+would have used one for and why you chose not to. Hand-coding this assignment is entirely realistic; the placeholder
+notebooks exist so that nobody has to lean on an assistant to get started.
+What does a good answer to “where did it mislead you?” look like?
+Specific, small, and measured. Two examples of the shape:
+“Copilot wrote the whole TF-IDF pipeline correctly first time and saved me about an hour. It also told me confidently that
+setting class_weight='balanced' would fix my imbalance. It changed accuracy by 0.4%, and I only know that because I
+measured it instead of believing it.”
+“I asked an assistant to draft ten eval cases for me. Eight were plausible. Two described a symptom that does not occur in my
+domain at all, and I only caught it because I know the domain — which is presumably why the brief tells us to pick one we
+know.”
+Both are short. Both name a specific claim, and what happened when it met reality. Compare with “it was helpful but
+sometimes inaccurate”, which tells a reader nothing and which you could have written before starting the assignment.
+MARKING, WORDS AND ADMIN
+
+
+===== PAGE 6 =====
+PE6201  ·  EMERGING AI TECHNOLOGIES
+A1 · Foundations Build · FAQ
+Nanyang Technological University  ·  MSc Enterprise AI  ·  T1 AY2026–27
+Page 6
+“Explain every block of code” — how much do I really need to know?
+Block, not line. For each cell or coherent chunk of your notebook you should be able to say what it does and why it is there —
+what goes in, what comes out, and what would break if you deleted it. You are not being tested on syntax. Nobody will ask
+you to recite what a list comprehension is or why there is a colon at the end of a line. What matters is that you know what each
+piece of your build is for.
+So: “this cell splits my examples into a training set and a test set, so the classifier is scored on items it has never seen” is
+exactly the right level. “This cell calls train_test_split with stratify” is not required, and is not worth extra.
+What counts toward the 1,200 words?
+Your combined writeup only — roughly 400 words per part. Code, comments, notebook output, tables, the self-appraisal
+cover sheet and any appendix do not count. The cap exists to stop you padding; if you are at 700 words and have said
+everything, you are finished.
+My writeup is in English but my documents and data are not. Is that a problem?
+Submit the writeup in English. Your domain data, documents and eval cases can be in any language you like — and if retrieval
+or prompting behaves differently in that language, that is a genuinely interesting observation and belongs in your 400 words.
+The starter notebooks come with a README.md. What is a .md file, and how do I open it?
+A .md file is a Markdown file — an ordinary plain-text file with a few light formatting marks in it. The #, ** and | characters
+you may see are the formatting, not typos or corruption. It needs no special software, and there is nothing to install.
+ If you want to…
+Do this
+Just read it
+Open README.pdf, which sits in the same folder. Identical content, properly laid out. This is the
+easy answer and most of you should stop here.
+Read the .md itself
+Drag the file into a browser tab, or right-click it and choose Open with → Notepad (Windows) /
+TextEdit (Mac) / VS Code.
+See it formatted properly
+Upload it to Google Colab, or open it in VS Code and press the preview button. Both render the
+headings and tables rather than showing the marks.
+Do not double-click it and worry if your machine opens it in something strange — a .md file has no single owning application,
+so whatever your computer guesses is arbitrary. Any text editor will do.
+The same goes for the .py files beside each notebook. They are the same content as the .ipynb in a plain-text format, kept
+for version control. Open the .ipynb, not the .py.
+A cell in the starter notebook does not work. Is it broken?
+Possibly, and that is worth knowing about. These notebooks were written before any of you ran them, against library versions,
+model names and provider behaviour that all change without notice. Assume they will need occasional repair rather than
+assuming they are infallible.
+What to do, in order:
+ (1) Read the error. The last line of a Python traceback usually names the problem in plain words — a missing package, a
+model your key cannot reach, a network timeout.
+(2) Try to fix it yourself. Debugging is not a detour from this assignment; it is a large part of what building anything
+actually consists of, and working out why something broke is Technical Execution and Reasoning at the same time.
+(3) Report it — in class or by email — with the cell it happened in, the full error text, and what you already tried. I will fix
+the shared copy and tell the cohort, so nobody behind you loses the same hour.
+Reporting a problem costs you nothing and is not an admission that you are struggling. A starter notebook is shared
+infrastructure — the first person to hit a bug and say so saves everyone who comes after them. That is exactly how a working
+team behaves, and it is a better instinct to leave this course with than a perfect score.
+
+
+===== PAGE 7 =====
+PE6201  ·  EMERGING AI TECHNOLOGIES
+A1 · Foundations Build · FAQ
+Nanyang Technological University  ·  MSc Enterprise AI  ·  T1 AY2026–27
+Page 7
+One thing not to do: quietly work around a broken cell and say nothing. If your fix changes what the notebook measures — a
+different model, a smaller sample, a skipped check — say so in your writeup. An unexplained deviation looks like a mistake;
+an explained one looks like judgement.
+My code does not run properly and the deadline is tomorrow. What do I do?
+Submit it, and document exactly what fails and what you think is causing it. Technical Execution will take the hit — but that is
+30%, and Conceptual Understanding, Reasoning and Communication are the other 70%, all of which are still fully available to
+you. A clearly diagnosed failure scores far better than a quietly broken submission, and immeasurably better than a
+fabricated result.
+How do I choose which model to use?
+Deliberately — and this is not a side issue. Choosing a model against a budget is one of the skills this course exists to teach,
+and Part 1 asks you to measure exactly the thing that should drive the choice.
+  Start on the cheap default. The starter notebooks ship with a small, inexpensive model. Begin there every time, and make
+it prove itself inadequate before you spend more.
+ Only move up on evidence. Your accuracy figure in Part 1 and your pass rates in Part 3 are the evidence. “The bigger
+model felt better” is not — noticing that is the entire point of building an eval harness.
+ Know the spread. On openrouter.ai/models the price range across models is not a few percent; it is orders of
+magnitude. Input and output are priced separately, and output usually costs several times more than input.
+ Open-weight models are often the sweet spot. Qwen, DeepSeek and Llama variants cost a fraction of frontier prices and
+are strong at exactly the narrow, structured tasks this assignment asks for.
+ Avoid reasoning models here. They bill you for thinking tokens you never see, which is poor value on a one-word
+classification or a small JSON extraction.
+ Compare on cost per item, not cost per token — and remember latency is one of your four measurements, so a
+cheap-but-slow model is a real trade-off, not a free win.
+If you do try a second model, report both. A paragraph showing that the expensive model bought you two percentage points
+for eight times the cost is worth more marks than a single number from whichever model you happened to pick.
+How do I check how much credit I have left?
+OpenRouter will tell you. From a terminal:
+curl https://openrouter.ai/api/v1/key \
+  -H "Authorization: Bearer YOUR_OPENROUTER_API_KEY"
+It replies with JSON that looks like this:
+{
+  "data": {
+    "label": "My Key Name",
+    "usage": 0.45,          // total spent on this key, in US$
+    "limit": 10.00,         // your spending cap (null if none is set)
+    "is_free_tier": false,
+    "rate_limit": { "requests": 200, "interval": "10s" }
+  }
+}
+What you have left is limit minus usage — $9.55 in that example. Two other fields are worth knowing: rate_limit tells
+you how many requests you may make in a given window, which is what you have hit when a cell fails and then works a
+minute later; and is_free_tier should be false on your key.
+No terminal? Run it from the notebook instead. Each starter notebook already has a credit_check() cell just after the
+setup — run it whenever you like. Checking your balance is itself free; this endpoint is not billed.
+
+
+===== PAGE 8 =====
+PE6201  ·  EMERGING AI TECHNOLOGIES
+A1 · Foundations Build · FAQ
+Nanyang Technological University  ·  MSc Enterprise AI  ·  T1 AY2026–27
+Page 8
+import urllib.request, json
+ 
+def credit_check():
+    req = urllib.request.Request('https://openrouter.ai/api/v1/key',
+                                 headers={'Authorization': f'Bearer {API_KEY}'})
+    d = json.load(urllib.request.urlopen(req))['data']
+    used, cap = d['usage'], d['limit']
+    print(f'spent ${used:.4f} of ${cap:.2f} - ${cap - used:.4f} remaining')
+ 
+credit_check()
+Do not paste your key into a notebook cell to do this. Read it from the Colab secret or the environment variable, as the starter
+notebooks do. A key typed into a cell is saved into the notebook file, and the notebook file goes into your submission ZIP.
+Check it at the start of a working session and again at the end. Two numbers a week is enough to notice a problem while it is
+still small.
+What if I run out of API credit?
+Credit will not be topped up. The allocation on your key is fixed and is sized to cover A1, A2 and the End-of-Course Project
+with room to spare. Working inside a fixed budget is part of what is being taught here — teams in industry are given a budget,
+not a replenishment.
+Running out is therefore a signal, not an accident. Doing this assignment as designed costs a small fraction of your allocation,
+so if the balance is falling fast, something specific is consuming it — usually an expensive model chosen without measuring, a
+loop re-running the full eval set to debug one broken cell, or a long max_tokens on a task that needs six words.
+How to make it last, which costs you nothing in marks:
+  Run credit_check() at both ends of every working session, as above. Do not discover the balance at the end.
+ Debug on a slice. Set FAST_MODE = True to run five cases instead of ten while you are getting things working, then switch
+it off for the real run.
+ Keep temperature = 0 and max_tokens tight. You are not paying for prose.
+ Use the free paths for everything that does not need a model: the scikit-learn classifier in Part 1, all of the chunking,
+embedding and retrieval in Part 2, every L1 assertion in Part 3, and a human L2 instead of a model judge.
+If you do run out, email me straight away. What you will get is help working out where it went and a plan for finishing with
+what remains — not more credit. Come early and that is a manageable conversation; come the night before the deadline and it
+is not.
+Where do I ask something that is not here?
+Bring it to class, ask in the Week 3 or 4 session, or email. There is no such thing as a question too basic; if you are wondering,
+six other people are too — which is how every question on this page got here.

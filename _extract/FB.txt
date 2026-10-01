@@ -1,0 +1,158 @@
+
+===== PAGE 1 =====
+PE6201  ·  EMERGING AI TECHNOLOGIES
+A1 · Foundations Build · 16%
+Nanyang Technological University  ·  MSc Enterprise AI  ·  T1 AY2026–27
+Page 1
+ASSESSMENT 1 OF 2 · CONTINUOUS ASSESSMENT
+A1 — Foundations Build
+Individual · 16% of your course grade · Marked by the instructor
+Released
+Sunday 16 August 2026
+Weight
+16%
+Due
+Sunday 30 August 2026, 23:59 SGT
+Covers
+Weeks 1–3
+Submit to
+NTULearn
+Rubric
+Rubric 1 (four criteria)
+Read this first if you have never written code. Two-thirds of this cohort arrived without a technical background — you are the
+majority, not the exception. This assignment is built for you. Every part comes with a starter notebook where the scaffolding is
+already written; your job is to make choices, run things, and explain what happened.
+Half the marks are for thinking, not coding. Technical Execution is 30%. Conceptual Understanding (25%) and Reasoning &
+Justification (25%) together are 50%. A modest build that you can explain clearly and justify honestly will outscore an elaborate
+one you cannot account for.
+WHAT THIS IS FOR
+In Class 1 you discovered that you cannot predict what AI is good at by asking how hard a task looks — the capability frontier
+is jagged, and the only reliable way to find its edge is to test. A1 is that argument turned into work. Rather than reasoning
+about which approach is better, you will build competing approaches, measure them, and defend a choice with evidence.
+PICK YOUR DOMAIN FIRST
+All three parts use one domain of your choosing. Pick something you genuinely know — you will be judged partly on
+whether you can tell a sensible answer from a nonsense one, and that requires real knowledge.
+It does not need to be a business context. Good choices include your undergraduate subject, a hobby you have practised for
+years, a part-time job, a city or country you know well, a sport, a game, a language, a cuisine, a body of fiction. Choose the
+thing you could talk about for an hour without preparation.
+Scope check. If your domain is “healthcare” it is too broad. “Triage notes in an emergency department” is workable. If it is “my
+grandmother's recipes” it may be too small to find 10–30 documents for Part 2 — though it is a perfectly good choice for Parts 1
+and 3. Ask if you are unsure. Asking early is not a weakness.
+WHAT YOU SUBMIT — THREE PARTS AND A SELF-APPRAISAL
+Part 1 · Choose the right tool (Week 1–2 material)
+Take a classification task in your domain — sorting things into two or more categories. Build it twice.
+ (a) A scikit-learn classifier trained on labelled examples.
+(b) A foundation-model API call with a prompt, and no training at all.
+Measure both on accuracy, cost, latency, and effort. Then answer the question that matters: which would you actually deploy
+— and at what scale would your answer change?
+Deliverable: one notebook, a comparison table, and roughly 400 words.
+Part 2 · Build a minimal retrieval system (Week 2 material)
+Assemble a small collection of documents from your domain — 10 to 30 is enough. Build a system that retrieves relevant
+passages and uses them to answer questions.
+  Show it answering five questions it could not possibly answer without your documents.
+ Then break it. Find a question where retrieval fails or returns the wrong passage, and explain why it failed.
+
+
+===== PAGE 2 =====
+PE6201  ·  EMERGING AI TECHNOLOGIES
+A1 · Foundations Build · 16%
+Nanyang Technological University  ·  MSc Enterprise AI  ·  T1 AY2026–27
+Page 2
+The breaking is not optional and it is not a penalty. Finding the edge of your own system is the single most valuable thing you
+will do in this assignment.
+Deliverable: one notebook, five worked examples, one documented failure, and roughly 400 words.
+Part 3 · Prompt and evaluate (Week 2–3 material)
+Choose a task in your domain that a model could plausibly do. Write a prompt for it. Then build a ten-case evaluation set —
+ten inputs, each with the output you would accept as correct.
+This part does not use Part 2. You are evaluating a plain prompt sent straight to the model — no retrieval, no documents,
+no RAG. In Class 2 you saw the evaluation harness applied to the retrieval build and in Class 3 to prompting; the technique is
+the same either way, and here you point it at a direct prompt. If you would rather evaluate your Part 2 retrieval system instead,
+you may — but it earns no extra marks, and the simpler route is the safer one.
+  Grade every case at two levels, as demonstrated in Classes 2 and 3. Level 1 (L1) — automatic assertions: checks a
+machine can run on its own (the format is valid, the required fields are present, a value falls in range, a label matches).
+Every case gets these. Level 2 (L2) — judgement: at least one check that no assertion can make — an LLM-as-judge (a
+second model scoring the output against your criteria) or your own human rating — for whether the answer is actually right
+and actually usable.
+ Run the prompt against all ten. Report the pass rate at each level.
+ Change the prompt once. Re-run all ten. Report what moved at L1 and at L2, and say whether you expected it.
+Keep the harness runnable — the deliverable is a working evaluation harness, not an essay about evaluation. If L1 passes and
+L2 fails, that gap is the most interesting thing in your submission: say what it tells you.
+Deliverable: one notebook containing the runnable harness, your eval set, both result tables (L1 and L2, before and after),
+and roughly 400 words.
+Self-appraisal (required, not graded)
+A short cover sheet, submitted with your work. It is not marked, but a submission without it is incomplete.
+  Rate yourself against each of the four criteria (Excellent / Proficient / Developing / Limited).
+ Two or three sentences on Criterion 3 — Reasoning & Justification: what trade-offs did you weigh, and what would you
+fix with more time?
+ And one question specific to this course: where did an AI assistant genuinely help you, and where did it confidently
+mislead you? You are studying the jagged frontier. You will have just walked across it.
+HOW IT IS MARKED
+ Criterion
+Weight
+What earns a strong mark
+1. Conceptual Understanding
+25%
+You use the vocabulary precisely and place your choices correctly in the
+taxonomy.
+2. Technical Execution
+30%
+It runs, it does what you claim, and the measurements are real.
+3. Reasoning & Justification
+25%
+You weigh alternatives explicitly, name the trade-offs, and admit the
+limitations.
+4. Communication & Clarity
+20%
+A marker can follow what you did and why, without reverse-engineering
+your code.
+Each criterion is banded Excellent (4) / Proficient (3) / Developing (2) / Limited (1); the weighted average converts to a
+percentage. Full descriptors are in the published rubric document.
+Criterion 3 is where postgraduate work separates itself. Two students can build the same thing and be marked a band apart
+on whether they explained why they built it that way, what else they considered, and where it breaks. Budget time for the
+writing.
+WHAT WE PROVIDE
+
+
+===== PAGE 3 =====
+PE6201  ·  EMERGING AI TECHNOLOGIES
+A1 · Foundations Build · 16%
+Nanyang Technological University  ·  MSc Enterprise AI  ·  T1 AY2026–27
+Page 3
+ Starter notebooks for all three parts, on NTULearn from the release date. Imports, boilerplate and scaffolding are already
+written. Open the .ipynb files — in Google Colab if you have no other setup. Instructions come with them as
+README.pdf (and the same text as README.md, which is just a plain-text file — open the PDF if the .md will not open).
+ Starter code is not guaranteed infallible. It was written before you ran it, against library versions and model names that
+change. If a cell fails: read the error, try to fix it yourself (debugging is part of the work, not a detour from it), and then
+report it with the full error text so I can fix the shared copy for everyone. Reporting a problem costs you nothing.
+ An API key, issued to you individually, with credit sufficient for this assignment and the rest of the course. Do not share it.
+The allocation is fixed and will not be topped up — choosing a model you can afford is part of the work, and the FAQ
+explains how to make it last.
+ A FAQ — PE6201_A1_FAQ.pdf, released alongside this brief. It defines every term here that does real work — accuracy,
+cost, latency, effort, scale, edge, system, harness — with the formulas, and answers the questions this brief reliably
+produces. Read it before you email.
+ Worked in-class examples. Part 1 mirrors the Class 1 build — Capsule 2, the classifier-versus-API comparison. Part 2
+builds on the Class 2 retrieval build. Part 3 builds on the Class 3 prompting and evaluation build. If you followed those
+sessions you have seen the shape of the work, and the notebooks are on NTULearn.
+USING AI TO BUILD AI
+You may use AI assistants for this assignment. You would be a strange student of this subject if you did not. Three
+conditions:
+ (1) You must be able to explain every block of code you submit — what it does, and why it is there. Block, not line: you
+are not being tested on syntax, only on whether you know what each piece of your build is for.
+(2) Verify the measurements yourself. An assistant will happily invent a plausible accuracy figure. Your marks depend on
+your numbers being real.
+(3) Report the experience in your self-appraisal — where it helped, where it misled you.
+All individually-submitted work must be your own, with authorship clearly attributed. NTU's academic integrity policy applies
+in full.
+PRACTICAL
+  Submit a single ZIP: three notebooks (.ipynb), one combined writeup (PDF, roughly 1,200 words), and your
+self-appraisal cover sheet.
+ Name it PE6201_A1_[YourName]_[MatricNumber].zip
+ All deadlines are Singapore time (SGT, UTC+8) and are the same for Groups A, B and C.
+ Late work follows standard NTU policy. If something has gone wrong in your life, email me before the deadline rather
+than after.
+ Questions — bring them to class, ask in the Week 3 or 4 session, or email. There is no such thing as a question too basic; if
+you are wondering, six other people are too.
+A NOTE ON AMBITION
+The strongest submissions in an assignment like this are rarely the most technically elaborate. They are the ones where a student
+picked a domain they truly understood, built something modest, tested it honestly, found where it broke, and explained all of that
+clearly. Build something small that you understand completely.
